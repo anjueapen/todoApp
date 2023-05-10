@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 export const Todo = () => {
     const [todoValue, setTodoValue] = useState("");
     const [todoTable, setTodoTable] = useState([]);
-    const [errorMsg, setErrorMsg] = useState("");
+    const [errorMsg, setErrorMsg] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [todoId, setTodoId] = useState(0);
 
@@ -20,42 +20,46 @@ export const Todo = () => {
         }
     }, [])
     const handleChange = (event) => {
-        setTodoValue(event?.target?.value)
+        setTodoValue(event?.target?.value);
+        setErrorMsg(false)
     }
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(todoValue);
 
         if (todoValue === "") {
-            setErrorMsg("Field is empty..")
-        }
-        let newData = {};
-        if (isEdit) {
-            const updated = {
-                id: todoId,
-                val: todoValue,
-                completed: false
-            };
-
-            const updatedTodo = todoTable?.map((tod) => {
-                if (tod.id === todoId) {
-                    return updated;
-                } else {
-                    return tod;
-                }
-            });
-            setTodoTable(updatedTodo); setIsEdit(false)
+            setErrorMsg(true);
         }
         else {
-            newData = [...todoTable, {
-                id: id + 1,
-                val: todoValue,
-                completed: false
-            }];
-            setTodoTable(newData)
+            let newData = {};
+            if (isEdit) {
+                const updated = {
+                    id: todoId,
+                    val: todoValue,
+                    completed: false
+                };
+
+                const updatedTodo = todoTable?.map((tod) => {
+                    if (tod.id === todoId) {
+                        return updated;
+                    } else {
+                        return tod;
+                    }
+                });
+                setTodoTable(updatedTodo); setIsEdit(false)
+            }
+            else {
+                newData = [...todoTable, {
+                    id: id + 1,
+                    val: todoValue,
+                    completed: false
+                }];
+                setTodoTable(newData)
+            }
+            localStorage.setItem('todoTable', JSON.stringify(newData));
+            setTodoValue('')
         }
-        localStorage.setItem('todoTable', JSON.stringify(newData));
-        setTodoValue('')
+
     }
     const handleDelete = (id) => {
         console.log(id);
@@ -89,7 +93,7 @@ export const Todo = () => {
     return (
         <div className='main-container'>
             <h1>Todo List</h1>
-            <AddTodo todoValue={todoValue} handleChange={handleChange} handleSubmit={handleSubmit} isEdit={isEdit} />
+            <AddTodo todoValue={todoValue} handleChange={handleChange} handleSubmit={handleSubmit} isEdit={isEdit} errorMsg={errorMsg} />
             <TodoList todoTable={todoTable} handleDelete={handleDelete} handleEdit={handleEdit} handleComplete={handleComplete} />
         </div>
     )
